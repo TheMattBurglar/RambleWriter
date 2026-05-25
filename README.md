@@ -17,7 +17,7 @@ Traditional word processors interrupt your creative flow with persistent red and
 ## 🚀 Key Features
 
 - **🚫 Zero Distractions**: Automatic web browser spelling squigglies are deactivated (`spellCheck={false}`), keeping your workspace pristine and clean while writing.
-- **🤖 Built-in Local AI Proofreader**: Features an offline-first AI grammar correction pipeline powered by a `llama-server` sidecar process (llama.cpp) running the Qwen2.5-1.5B-Instruct model (Q4_K_M, ~1.1GB). The binary and model are downloaded on first use and stored in your user data directory. GPU acceleration via Vulkan (Linux/Windows) or Metal (macOS) is used automatically. Your text never leaves your device!
+- **🤖 Built-in Local AI Proofreader**: Features an offline-first AI grammar correction pipeline powered by a `llama-server` sidecar process (llama.cpp) running the Qwen3-1.7B model (Q4_K_M). The binary and model are downloaded on first use and stored in your user data directory. GPU acceleration via Vulkan (Linux/Windows) or Metal (macOS) is used automatically. Your text never leaves your device!
 - **⚡ Smart Sentence Diffing**: Side-by-side, sentence-level diff highlights showing exactly what the AI suggests modifying, with quick one-click accept/reject controls.
 - **📝 Markdown Live Rendering**: Edit and view your rendered documents simultaneously. Switch seamlessly between `Split View`, `Raw Editor Only`, and `Full Preview` modes.
 - **💾 Local Desktop File Management**: Integrated file list sidebar with lightning-fast local filesystem storage, auto-save state, and title renaming.
@@ -30,7 +30,7 @@ Traditional word processors interrupt your creative flow with persistent red and
 
 - **Framework**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) + [Vite](https://vite.dev/)
 - **Desktop Wrapper**: [Electron 42](https://www.electronjs.org/) for native OS integration
-- **AI Core**: [llama.cpp](https://github.com/ggml-org/llama.cpp) (`llama-server`) running as a local sidecar process with Qwen2.5-1.5B-Instruct (GGUF Q4_K_M)
+- **AI Core**: [llama.cpp](https://github.com/ggml-org/llama.cpp) (`llama-server`) running as a local sidecar process with Qwen3-1.7B (GGUF Q4_K_M)
 - **Markdown Compiler**: [Marked](https://marked.js.org/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Effects**: [Canvas Confetti](https://github.com/catdad/canvas-confetti)
@@ -48,7 +48,7 @@ Make sure you have [Node.js](https://nodejs.org/) (v18 or higher recommended) in
 Clone the repository and install the dependencies:
 
 ```bash
-git clone https://github.com/your-username/RambleWriter.git
+git clone https://github.com/TheMattBurglar/RambleWriter.git
 cd RambleWriter
 npm install
 ```
@@ -77,4 +77,4 @@ npx electron-builder
 
 ## 🔒 Privacy First
 
-Because RambleWriter uses local AI inference (via Transformers.js in a Web Worker), **no external APIs are called** during your editing or proofreading process. All spelling, grammar corrections, and drafts remain completely local on your hard drive, keeping your creative work fully private.
+Because RambleWriter uses local AI inference (via a llama.cpp sidecar process), **no external APIs are called** during your editing or proofreading process. All spelling, grammar corrections, and drafts remain completely local on your hard drive, keeping your creative work fully private.
