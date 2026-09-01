@@ -3,13 +3,38 @@
   "private": true,
   "version": "0.0.0",
   "main": "dist-electron/main.js",
+  "author": {
+    "name": "TheMattBurglar",
+    "email": "jacenlinux@gmail.com"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "electron:compile": "tsc -p tsconfig.electron.json",
-    "electron:dev": "concurrently -k \"npm run dev\" \"npm run electron:compile -- -w\" \"wait-on http://localhost:5173 && VITE_DEV_SERVER_URL=http://localhost:5173 ELECTRON_OZONE_PLATFORM_HINT=x11 electron .\""
+    "electron:dev": "concurrently -k \"npm run dev\" \"npm run electron:compile -- -w\" \"wait-on http://localhost:5173 && VITE_DEV_SERVER_URL=http://localhost:5173 ELECTRON_OZONE_PLATFORM_HINT=x11 electron .\"",
+    "package": "npm run build && npm run electron:compile && electron-builder build --linux"
+  },
+  "build": {
+    "appId": "com.ramblewriter.app",
+    "productName": "RambleWriter",
+    "directories": {
+      "output": "dist-packaged"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Office;Utility;TextEditor;",
+      "icon": "public/favicon.svg"
+    }
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
