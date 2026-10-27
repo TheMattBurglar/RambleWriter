@@ -18,6 +18,8 @@ import {
   FolderOpen,
   Sun,
   Moon,
+  AArrowDown,
+  AArrowUp,
 } from 'lucide-react';
 import { Marked } from 'marked';
 import confetti from 'canvas-confetti';
@@ -75,6 +77,14 @@ const isQuoteStrippingFix = (fix: { original: string; corrected: string }) => {
   return LEADING_TRAILING_QUOTE_RE.test(orig) && !LEADING_TRAILING_QUOTE_RE.test(corr);
 };
 
+// Drop any fix that adds double quotation marks. The model sees one paragraph at a time,
+// so it reads multi-paragraph dialogue (open quote, no close) as a missing closing quote,
+// and it also likes converting 'single-quoted' terms to "double". Apostrophes are left
+// alone so contraction fixes (it's → its) still come through.
+const DOUBLE_QUOTE_RE = /["“”]/g;
+const isQuoteAddingFix = (fix: { original: string; corrected: string }) =>
+  (fix.corrected.match(DOUBLE_QUOTE_RE)?.length ?? 0) > (fix.original.match(DOUBLE_QUOTE_RE)?.length ?? 0);
+
 export default function App() {
   // Filesystem States
   const [files, setFiles] = useState<FileInfo[]>([]);
@@ -113,6 +123,43 @@ export default function App() {
     document.documentElement.dataset.theme = theme === 'light' ? 'light' : '';
     localStorage.setItem('rw-theme', theme);
   }, [theme]);
+
+  // Writing text zoom (editor + preview), persisted like theme
+  const TEXT_SCALE_MIN = 0.8;
+  const TEXT_SCALE_MAX = 2;
+  const TEXT_SCALE_STEP = 0.1;
+  const [textScale, setTextScale] = useState<number>(() => {
+    const stored = parseFloat(localStorage.getItem('rw-text-scale') ?? '');
+    return Number.isFinite(stored) ? stored : 1;
+  });
+
+  const adjustTextScale = (delta: number) => {
+    setTextScale(s => Math.round(Math.min(TEXT_SCALE_MAX, Math.max(TEXT_SCALE_MIN, s + delta)) * 10) / 10);
+  };
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--text-scale', String(textScale));
+    localStorage.setItem('rw-text-scale', String(textScale));
+  }, [textScale]);
+
+  // Ctrl/Cmd + '=' / '-' / '0' to zoom writing text
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+      if (e.key === '=' || e.key === '+') {
+        e.preventDefault();
+        adjustTextScale(TEXT_SCALE_STEP);
+      } else if (e.key === '-' || e.key === '_') {
+        e.preventDefault();
+        adjustTextScale(-TEXT_SCALE_STEP);
+      } else if (e.key === '0') {
+        e.preventDefault();
+        setTextScale(1);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const autosaveTimeoutRef = useRef<any>(null);
@@ -581,6 +628,7 @@ export default function App() {
               const fixedCorrected = reapplyMarkdownWrappers(d.original, d.corrected);
               if (fixedCorrected === null) return [];
               if (isQuoteStrippingFix({ original: d.original, corrected: fixedCorrected })) return [];
+              if (isQuoteAddingFix({ original: d.original, corrected: fixedCorrected })) return [];
               if (ignoredFixes.has(`${d.original}|||${fixedCorrected}`)) return [];
               return [{ ...d, corrected: fixedCorrected, id: `fix-${i}-${idx}-${Date.now()}` }];
             }) as ProposedFix[];
@@ -805,6 +853,34 @@ export default function App() {
 
               {/* View options Split, Editor, Preview */}
               <div className="toolbar-right">
+                <div className="text-size-controls">
+                  <button
+                    className="btn-icon"
+                    onClick={() => adjustTextScale(-TEXT_SCALE_STEP)}
+                    disabled={textScale <= TEXT_SCALE_MIN}
+                    title="Smaller text (Ctrl -)"
+                  >
+                    <AArrowDown size={15} />
+                  </button>
+                  <button
+                    className="text-size-label"
+                    onClick={() => setTextScale(1)}
+                    title="Reset text size (Ctrl 0)"
+                  >
+                    {Math.round(textScale * 100)}%
+                  </button>
+                  <button
+                    className="btn-icon"
+                    onClick={() => adjustTextScale(TEXT_SCALE_STEP)}
+                    disabled={textScale >= TEXT_SCALE_MAX}
+                    title="Larger text (Ctrl +)"
+                  >
+                    <AArrowUp size={15} />
+                  </button>
+                </div>
+
+                <div style={{ width: '1px', height: '18px', background: 'var(--border-light)', margin: '0 8px' }} />
+
                 <button 
                   className={`btn-icon ${viewMode === 'editor' ? 'active' : ''}`}
                   onClick={() => setViewMode('editor')}

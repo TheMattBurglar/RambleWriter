@@ -163,14 +163,6 @@ export function getSentenceDiffs(
       finalType = 'replace';
     } else if (isInsert) {
       finalType = 'insert';
-      // For insertion, the index should be where the new word is injected
-      // Since it's inserted BEFORE the next original token, we find the next orig token or use end of previous
-      if (startChar === -1) {
-        // If there was no original token in this chunk, look ahead/behind
-        const nextOrig = ops.slice(subIdx).find(o => o.origToken)?.origToken;
-        startChar = nextOrig ? nextOrig.start : originalText.length + sentenceStartOffset;
-      }
-      endChar = startChar;
     } else if (isDelete) {
       finalType = 'delete';
     }
@@ -178,6 +170,25 @@ export function getSentenceDiffs(
     // Clean punctuation spaces
     origText = cleanPunctuationSpacing(origText);
     corrText = cleanPunctuationSpacing(corrText);
+
+    if (finalType === 'insert') {
+      // A pure insertion has no original token of its own, so anchor it to a neighbor.
+      // Trailing punctuation attaches to the end of the previous word
+      // (asked "Are → asked, "Are, not asked ,"Are); everything else goes in front of
+      // the next word, with a space so it doesn't fuse (seems → it seems, not itseems).
+      const prevOrig = ops.slice(0, idx).reverse().find(o => o.origToken)?.origToken;
+      const nextOrig = ops.slice(subIdx).find(o => o.origToken)?.origToken;
+      if (/^[,.;:!?)\]]/.test(corrText) && prevOrig) {
+        startChar = prevOrig.end;
+      } else if (nextOrig) {
+        startChar = nextOrig.start;
+        if (/[a-zA-Z0-9'.,;:!?]$/.test(corrText)) corrText += ' ';
+      } else {
+        startChar = originalText.length + sentenceStartOffset;
+        if (/^[a-zA-Z0-9]/.test(corrText)) corrText = ' ' + corrText;
+      }
+      endChar = startChar;
+    }
 
     // Filter out trivial casing-only changes or empty spacing diffs
     if (origText.toLowerCase() !== corrText.toLowerCase() || origText !== corrText) {

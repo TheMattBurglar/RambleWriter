@@ -6,6 +6,9 @@
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
+  /* Writing text zoom (set from App.tsx) */
+  --text-scale: 1;
+
   /* Color Palette */
   --bg-darker: #08080a;
   --bg-dark: #0f0f13;
@@ -440,7 +443,7 @@ body {
   resize: none;
   color: var(--color-text-main);
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: calc(14px * var(--text-scale));
   line-height: 1.6;
   padding: 24px 24px 72px;
   tab-size: 4;
@@ -496,7 +499,7 @@ body {
 /* Markdown Styled Output */
 .preview-markdown h1 {
   font-family: var(--font-title);
-  font-size: 26px;
+  font-size: calc(26px * var(--text-scale));
   margin-bottom: 20px;
   font-weight: 800;
   border-bottom: 1px solid var(--border-light);
@@ -506,7 +509,7 @@ body {
 
 .preview-markdown h2 {
   font-family: var(--font-title);
-  font-size: 20px;
+  font-size: calc(20px * var(--text-scale));
   margin-top: 24px;
   margin-bottom: 12px;
   font-weight: 700;
@@ -514,7 +517,7 @@ body {
 
 .preview-markdown h3 {
   font-family: var(--font-title);
-  font-size: 16px;
+  font-size: calc(16px * var(--text-scale));
   margin-top: 20px;
   margin-bottom: 10px;
   font-weight: 600;
@@ -522,7 +525,7 @@ body {
 
 .preview-markdown p {
   margin-bottom: 16px;
-  font-size: 14px;
+  font-size: calc(14px * var(--text-scale));
 }
 
 .preview-markdown blockquote {
@@ -537,7 +540,7 @@ body {
 
 .preview-markdown code {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: calc(12px * var(--text-scale));
   background: var(--bg-input);
   padding: 3px 6px;
   border-radius: 4px;
@@ -557,13 +560,13 @@ body {
   background: transparent;
   padding: 0;
   color: inherit;
-  font-size: 13px;
+  font-size: calc(13px * var(--text-scale));
 }
 
 .preview-markdown ul, .preview-markdown ol {
   margin-left: 24px;
   margin-bottom: 16px;
-  font-size: 14px;
+  font-size: calc(14px * var(--text-scale));
 }
 
 .preview-markdown li {
@@ -1042,4 +1045,29 @@ body {
   max-width: 400px;
   margin-bottom: 24px;
   line-height: 1.5;
+}
+
+/* Writing text size controls */
+.text-size-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.text-size-label {
+  min-width: 40px;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: var(--transition-fast);
+}
+
+.text-size-label:hover {
+  color: var(--color-text-main);
+  background: var(--bg-hover-subtle);
 }
